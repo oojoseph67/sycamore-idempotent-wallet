@@ -3,7 +3,7 @@ import { AppError } from "../../global/errors";
 import { LoginDto, SignupDto } from "../../dto";
 import { HashingProvider } from "../../global/hashing";
 import { COOKIE_NAME, generateToken } from "../../global/jwt/jwt.index";
-import { User } from "../../models";
+import { User, Wallet } from "../../models";
 
 export class AuthController {
   constructor(private readonly hashingProvider: HashingProvider) {}
@@ -13,6 +13,7 @@ export class AuthController {
       const signupData = req.body as SignupDto;
       const { email, firstName, lastName, password } = signupData;
 
+      // checking if user exists
       const existingUser = await User.findOne({
         where: { email },
       });
@@ -21,28 +22,31 @@ export class AuthController {
         throw AppError.conflict({ message: "user already exists" });
       }
 
+      // hashing password
       const hashedPassword = await this.hashingProvider.hashPassword({
         password,
       });
 
-      const newUser = await User.create({
+      // creating user
+      const user = await User.create({
         email,
         firstName,
         lastName,
         password: hashedPassword,
       });
 
+      // creating wallet
+      await Wallet.create({
+        userId: user.id,
+      });
+
       const { accessToken } = generateToken({
-        userId: newUser.id,
+        userId: user.id,
         res,
       });
 
       return {
         message: "user signup successful",
-        user: {
-          id: newUser.id,
-          email: newUser.email,
-        },
         accessToken,
       };
     } catch (error: any) {

@@ -1,8 +1,12 @@
-import { Sequelize } from "sequelize";
+import { Sequelize } from "sequelize-typescript";
 import { config } from "./env";
+import { User } from "../models/user/user.model";
+import { Wallet } from "../models/user/wallet.model";
+import { TransactionLog } from "../models/transaction/transaction.model";
 
 const sequelize = new Sequelize(config.databaseUrl, {
   logging: console.log,
+  models: [User, Wallet, TransactionLog],
 });
 
 const connectDB = async () => {
@@ -20,7 +24,7 @@ const disconnectDB = async () => {
     await sequelize.close();
     console.log(`db disconnected via sequelize`);
   } catch (error: any) {
-    console.error(`error connecting to db: ${error.message}`);
+    console.error(`error disconnecting db: ${error.message}`);
   }
 };
 
