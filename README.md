@@ -1,203 +1,76 @@
-# Express Backend
+# Idempotent Wallet
 
-A robust Express.js backend API built with TypeScript, featuring authentication, database management with Prisma, and comprehensive API documentation.
+Express API for transferring funds between user wallets with idempotency. Each new account gets **10,000 NAIRA** automatically.
 
-## Features
+## Quick start
 
-- **Express.js** with TypeScript for type-safe development
-- **Prisma ORM** with PostgreSQL database
-- **JWT Authentication** with access and refresh tokens
-- **Swagger API Documentation** at `/api/docs`
-- **Input Validation** using class-validator and Joi
-- **Error Handling** with centralized error management
-- **Cookie-based** authentication support
+**Prerequisites:** Node.js 18+, pnpm, PostgreSQL.
 
-## Prerequisites
+1. **Clone and install**
 
-- Node.js (v18 or higher)
-- pnpm (v8.15.0 or higher)
-- PostgreSQL database
+   ```bash
+   git clone <repository-url>
+   cd idempotent-wallet
+   pnpm install
+   ```
 
-## Installation
+2. **Database**
 
-1. Clone the repository:
+   Create a PostgreSQL database, then set `DATABASE_URL` in `.env` (see below). Run migrations:
 
-```bash
-git clone <repository-url>
-cd express-backend
+   ```bash
+   npx sequelize-cli db:migrate
+   ```
+
+3. **Environment**
+
+   Copy `.env.example` to `.env` and fill in:
+
+   - `DATABASE_URL` – e.g. `postgresql://postgres:password@localhost:5432/idempotent_wallet`
+   - `JWT_SECRET`, `JWT_TOKEN_AUDIENCE`, `JWT_TOKEN_ISSUER` (and optional `PORT`, token TTLs)
+
+4. **Run**
+
+   ```bash
+   pnpm dev
+   ```
+
+   API base: `http://localhost:4567/api/v1` (or your `PORT`). Swagger: `http://localhost:4567/api/docs`.
+
+## Using the API
+
+1. **Create two accounts**  
+   `POST /api/v1/auth/signup` with `email`, `password`, `firstName`, `lastName`.  
+   Each new user gets a wallet with **10,000 NAIRA** automatically.
+
+2. **Login**  
+   `POST /api/v1/auth/login` with `email`, `password`. Use the returned token (or cookie) for protected routes.
+
+3. **Transfer between accounts**  
+   `POST /api/v1/transfer` with:
+
+   - **Authorization:** Bearer token (or cookie) of the sender.
+   - **Body:** `amount` (string number), `toUserId` (receiver’s user UUID), `idempotencyKey` (a UUID you generate).
+
+   Use a **new UUID for each transfer attempt** (e.g. from [uuidgenerator.net](https://www.uuidgenerator.net/) or `uuid` in code). Reusing the same `idempotencyKey` is safe: the API will return the existing result instead of double-spending.
+
+**Example transfer body:**
+
+```json
+{
+  "amount": "500",
+  "toUserId": "<receiver-user-uuid>",
+  "idempotencyKey": "<new-uuid-for-this-attempt>"
+}
 ```
 
-2. Install dependencies:
+## Scripts
 
-```bash
-pnpm install
-```
-
-3. Set up Prisma:
-
-```bash
-npx prisma init
-```
-
-4. Install Prisma dependencies (if not already installed):
-
-```bash
-pnpm add -D prisma@^6.0.0
-pnpm add "@prisma/client@^6.0.0"
-```
-
-5. Configure your database connection in `.env` (see Environment Variables below)
-
-6. Run database migrations:
-
-```bash
-npx prisma migrate dev --name init
-```
-
-7. Generate Prisma Client:
-
-```bash
-npx prisma generate
-```
-
-8. (Optional) Seed the database:
-
-```bash
-pnpm run seed
-```
-
-## Environment Variables
-
-Create a `.env` file in the root directory with the following variables:
-
-```env
-# Server Configuration
-PORT=3000
-NODE_ENV=development
-
-# Database
-DATABASE_URL="postgresql://user:password@localhost:5432/express?schema=public"
-
-# JWT Configuration
-JWT_SECRET=your-secret-key-here
-JWT_TOKEN_AUDIENCE=your-audience
-JWT_TOKEN_ISSUER=your-issuer
-JWT_ACCESS_TOKEN_TIME_TO_LIVE=15m
-JWT_REFRESH_TOKEN_TIME_TO_LIVE=7d
-```
-
-## Running the Project
-
-### Development Mode
-
-```bash
-pnpm run dev
-```
-
-The server will start on the port specified in your `.env` file (default: 3000).
-
-### Production Build
-
-```bash
-pnpm run build
-pnpm start
-```
-
-## API Documentation
-
-Once the server is running, access the Swagger API documentation at:
-
-```text
-http://localhost:3000/api/docs
-```
-
-## Available Scripts
-
-- `pnpm run dev` - Start development server with hot reload
-- `pnpm run build` - Build the project for production
-- `pnpm start` - Start the production server
-- `pnpm run seed` - Seed the database with initial data
-- `pnpm run watch` - Watch for TypeScript changes and recompile
-
-## Project Structure
-
-```text
-express-backend/
-├── src/
-│   ├── config/          # Configuration files (database, env, swagger)
-│   ├── controllers/     # Route controllers
-│   ├── dto/             # Data transfer objects for validation
-│   ├── global/          # Global utilities (errors, hashing, jwt)
-│   ├── middleware/      # Express middleware
-│   ├── routes/          # API route definitions
-│   ├── types/           # TypeScript type definitions
-│   ├── utils/           # Utility functions
-│   └── index.ts         # Application entry point
-├── prisma/
-│   ├── migrations/      # Database migrations
-│   ├── seed/            # Database seed files
-│   └── schema.prisma    # Prisma schema definition
-└── package.json
-```
-
-## Database Management
-
-### Create a new migration
-
-```bash
-npx prisma migrate dev --name migration-name
-```
-
-### Reset the database
-
-```bash
-npx prisma migrate reset
-```
-
-### View database in Prisma Studio
-
-```bash
-npx prisma studio
-```
+- `pnpm dev` – run with hot reload  
+- `pnpm build` / `pnpm start` – production  
+- `npx sequelize-cli db:migrate` – run migrations  
+- `npx sequelize-cli db:migrate:undo` – undo last migration  
 
 ## License
 
 ISC
-
-<!--
-run: npx prisma init
-pnpm add -D prisma@^6.0.0
-pnpm add "@prisma/client@^6.0.0"
-npx prisma migrate dev --name ``
-npx prisma generate
--->
-
-<!-- /**
- * @swagger
- * /auth/signup:
- *   post:
- *     summary: create a new user account
- *     tags: [auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required: [email, password, firstName, lastName]
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *               password:
- *                 type: string
- *                 minLength: 8
- *               firstName:
- *                 type: string
- *               lastName:
- *                 type: string
- *     responses:
- *       200:
- *         description: user signup successful
- *         ...
- */ -->
