@@ -47,7 +47,7 @@ const authController = new AuthController(hashingProvider);
  */
 router.post(
   "/signup",
-  createRateLimiter(rateLimitConfigs["/auth/signup"]),
+  // createRateLimiter(rateLimitConfigs["/auth/signup"]),
   validateRequest(SignupDto, "body"),
   authController.signup.bind(authController)
 );
@@ -97,7 +97,7 @@ router.post(
  */
 router.post(
   "/login",
-  createRateLimiter(rateLimitConfigs["/auth/login"]),
+  // createRateLimiter(rateLimitConfigs["/auth/login"]),
   validateRequest(LoginDto, "body"),
   authController.login.bind(authController)
 );

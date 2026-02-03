@@ -31,13 +31,18 @@ export class TransferController {
       if (exitingTxLog) {
         if (exitingTxLog.status === "COMPLETED") {
           return {
-            message: "Transaction already processed",
+            message: "transaction already processed",
             transaction: exitingTxLog,
           };
         }
         if (exitingTxLog.status === "PENDING") {
           return {
-            message: "Transaction in progress",
+            message: "transaction in progress",
+          };
+        }
+        if (exitingTxLog.status === "FAILED") {
+          return {
+            message: "transaction failed",
           };
         }
       }
@@ -61,6 +66,12 @@ export class TransferController {
       if (!receiverWallet) {
         throw AppError.badRequest({
           message: `receiver wallet not found`,
+        });
+      }
+
+      if (user.id === toUserId) {
+        throw AppError.unauthorized({
+          message: `cant send to yourself`,
         });
       }
 
@@ -138,6 +149,10 @@ export class TransferController {
         await txLog.update({
           status: "FAILED",
         });
+      }
+
+      if (error instanceof AppError) {
+        throw error;
       }
 
       const message = error instanceof Error ? error.message : String(error);

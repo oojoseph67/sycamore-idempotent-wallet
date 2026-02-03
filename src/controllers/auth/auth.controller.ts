@@ -38,6 +38,7 @@ export class AuthController {
       // creating wallet
       await Wallet.create({
         userId: user.id,
+        balance: 10000,
       });
 
       const { accessToken } = generateToken({
