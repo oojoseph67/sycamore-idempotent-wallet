@@ -129,6 +129,49 @@ const options: swaggerJsdoc.Options = {
             },
           },
         },
+        TransferDto: {
+          type: "object",
+          required: ["amount", "toUserId", "idempotencyKey"],
+          properties: {
+            amount: {
+              type: "string",
+              description: "non-negative number as string",
+              example: "500",
+            },
+            toUserId: {
+              type: "string",
+              format: "uuid",
+              description: "receiver user id",
+              example: "123e4567-e89b-12d3-a456-426614174000",
+            },
+            idempotencyKey: {
+              type: "string",
+              format: "uuid",
+              description: "unique key per transfer attempt to prevent double-spend",
+              example: "123e4567-e89b-12d3-a456-426614174001",
+            },
+          },
+        },
+        TransferResponse: {
+          type: "object",
+          properties: {
+            message: {
+              type: "string",
+              example: "transfer successful",
+            },
+            transaction: {
+              type: "object",
+              properties: {
+                id: { type: "string", format: "uuid" },
+                idempotencyKey: { type: "string" },
+                fromWalletId: { type: "string", format: "uuid" },
+                toWalletId: { type: "string", format: "uuid" },
+                amount: { type: "number" },
+                status: { type: "string", enum: ["PENDING", "COMPLETED", "FAILED"] },
+              },
+            },
+          },
+        },
         Error: {
           type: "object",
           properties: {
