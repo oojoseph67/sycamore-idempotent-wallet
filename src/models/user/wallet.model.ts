@@ -1,7 +1,12 @@
 import { Table, Column, Model, DataType } from "sequelize-typescript";
 
+export interface WalletCreationAttributes {
+  userId: string;
+  balance?: number;
+}
+
 @Table({ tableName: "wallets" })
-export class Wallet extends Model {
+export class Wallet extends Model<Wallet, WalletCreationAttributes> {
   @Column({
     type: DataType.UUID,
     primaryKey: true,

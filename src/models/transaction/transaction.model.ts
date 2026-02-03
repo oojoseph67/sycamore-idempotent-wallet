@@ -1,7 +1,18 @@
 import { Table, Column, Model, DataType } from "sequelize-typescript";
 
+export interface TransactionLogCreationAttributes {
+  idempotencyKey: string;
+  fromWalletId: string;
+  toWalletId: string;
+  amount: number;
+  status?: "PENDING" | "COMPLETED" | "FAILED";
+}
+
 @Table({ tableName: "transaction_logs" })
-export class TransactionLog extends Model {
+export class TransactionLog extends Model<
+  TransactionLog,
+  TransactionLogCreationAttributes
+> {
   @Column({
     type: DataType.UUID,
     primaryKey: true,
