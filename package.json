@@ -1,5 +1,5 @@
 {
-  "name": "express-typescript-boilerplate",
+  "name": "sycamore-idempotent-wallet",
   "version": "1.0.0",
   "description": "Express TypeScript boilerplate",
   "main": "dist/index.js",
@@ -9,7 +9,11 @@
     "start": "node dist/index.js",
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "seed": "ts-node-dev prisma/seed/seed.ts",
-    "watch": "tsc --watch"
+    "watch": "tsc --watch",
+    "db:migrate": "sequelize-cli db:migrate",
+    "db:migrate:undo": "sequelize-cli db:migrate:undo",
+    "db:migrate:generate": "sequelize-cli migration:generate --name",
+    "db:sync": "ts-node-dev src/scripts/sync-db.ts"
   },
   "keywords": [],
   "author": "",
@@ -28,7 +32,9 @@
     "pg": "^8.18.0",
     "pg-hstore": "^2.3.4",
     "reflect-metadata": "^0.2.2",
+    "save-dev": "0.0.1-security",
     "sequelize": "^6.37.7",
+    "sequelize-typescript": "^2.1.6",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0",
     "uuid": "^13.0.0"
@@ -39,9 +45,10 @@
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.7",
-    "@types/node": "^20.10.0",
+    "@types/node": "^20.19.27",
     "@types/swagger-jsdoc": "^6.0.1",
     "@types/swagger-ui-express": "^4.1.6",
+    "sequelize-cli": "^6.6.5",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.3.3"
   }

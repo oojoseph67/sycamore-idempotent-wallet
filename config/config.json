@@ -1,0 +1,22 @@
+{
+  "development": {
+    "username": "postgres",
+    "password": "admin",
+    "database": "idempotent_wallet",
+    "host": "localhost",
+    "port": 5433,
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "postgres",
+    "password": "admin",
+    "database": "idempotent_wallet_test",
+    "host": "localhost",
+    "port": 5433,
+    "dialect": "postgres"
+  },
+  "production": {
+    "use_env_variable": "DATABASE_URL",
+    "dialect": "postgres"
+  }
+}
